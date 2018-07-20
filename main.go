@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -8,7 +9,10 @@ import (
 )
 
 func main() {
-	resp, err := http.Get("http://www.google.com/robots.txt")
+	geturl := flag.String("url", "http://www.google.com", "get request destination")
+	flag.Parse()
+
+	resp, err := http.Get(*geturl)
 	if err != nil {
 		log.Fatal(err)
 	}
