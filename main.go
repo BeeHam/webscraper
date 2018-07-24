@@ -10,35 +10,36 @@ import (
 )
 
 func main() {
+	// retrieve url to target
 	geturl := flag.String("url", "http://www.google.com/robots.txt", "get request destination")
 	flag.Parse()
-
+	// send GET request and assign response
 	resp, err := http.Get(*geturl)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer resp.Body.Close()
-
-	// respbody, err := ioutil.ReadAll(resp.Body)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	//
-	// fmt.Printf("%s", respbody)
-
-	z := html.NewTokenizer(resp.Body)
+	// tokenize response body
+	tokBody := html.NewTokenizer(resp.Body)
+	// loop through all tokens
 	for {
-		tokType := z.Next()
+		tokType := tokBody.Next()
 
 		switch {
 		case tokType == html.ErrorToken:
+			// if Errortoken received, we've come to EOF
 			return
 		case tokType == html.StartTagToken:
-			if tok := z.Token(); tok.Data == "a" {
-				fmt.Println("Link found.")
+			if tok := tokBody.Token(); tok.Data == "a" {
+				// if we've found an <a> tag, iterate through all of its attributes
+				// and locate the href
+				for _, v := range tok.Attr {
+					if v.Key == "href" {
+						fmt.Println("Found href: ", v.Val)
+						break
+					}
+				}
 			}
-		default:
-			fmt.Println("No link found.")
 		}
 	}
 
